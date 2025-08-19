@@ -102,14 +102,6 @@ class FileManagerPanel(ttk.Frame):
         control_frame = ttk.Frame(self)
         control_frame.pack(fill="x", padx=10, pady=5)
 
-        self.load_btn = ttk.Button(
-            control_frame,
-            text="📊 Load Selected",
-            command=self.load_selected_file,
-            width=15,
-        )
-        self.load_btn.pack(fill="x", pady=2)
-
         self.clear_btn = ttk.Button(
             control_frame, text="🗑️ Clear All", command=self.clear_files, width=15
         )
@@ -305,31 +297,6 @@ class FileManagerPanel(ttk.Frame):
                     # Plot the selected channel
                     self.plot_panel.plot_channel_data(file_path, channel_name)
 
-    def load_selected_file(self):
-        """Load the currently selected file for analysis."""
-        # Get the selected file from the label
-        label_text = self.selected_file_label.cget("text")
-        if label_text == "No file selected":
-            messagebox.showwarning("Warning", "Please select a file first.")
-            return
-
-        # Extract file path from the tree selection
-        selection = self.file_tree.selection()
-        if not selection:
-            messagebox.showwarning("Warning", "Please select a file in the explorer.")
-            return
-
-        item = selection[0]
-        file_path = self.file_tree.item(item, "text")
-
-        if os.path.isfile(file_path):
-            self.select_file_for_analysis(file_path)
-            messagebox.showinfo(
-                "Success", f"File loaded: {os.path.basename(file_path)}"
-            )
-        else:
-            messagebox.showwarning("Warning", "Selected item is not a file.")
-
     def load_data(self):
         """Load selected data files."""
         items = self.file_tree.get_children()
@@ -351,7 +318,6 @@ class PlotPanel(ttk.Frame):
     def __init__(self, parent, **kwargs):
         """Initialize the plot panel."""
         super().__init__(parent, **kwargs)
-        self.current_plot_file = None
         self.data_service = None  # Will be set by parent
         self.current_file_path = None
         self.current_channel = None
@@ -369,25 +335,6 @@ class PlotPanel(ttk.Frame):
             font=("Helvetica", 14, "bold"),
         )
         title_label.pack(side="left")
-
-        # Plot control buttons
-        button_frame = ttk.Frame(header_frame)
-        button_frame.pack(side="right")
-
-        self.refresh_btn = ttk.Button(
-            button_frame, text="🔄 Refresh", command=self.refresh_plot, width=10
-        )
-        self.refresh_btn.pack(side="left", padx=2)
-
-        self.save_btn = ttk.Button(
-            button_frame, text="💾 Save Plot", command=self.save_plot, width=10
-        )
-        self.save_btn.pack(side="left", padx=2)
-
-        self.export_btn = ttk.Button(
-            button_frame, text="📤 Export", command=self.export_plot, width=10
-        )
-        self.export_btn.pack(side="left", padx=2)
 
         # Plot area frame
         self.plot_frame = ttk.LabelFrame(self, text="Histogram Plot", padding=10)
@@ -422,10 +369,10 @@ class PlotPanel(ttk.Frame):
                 mode="w", suffix=".html", delete=False
             ) as f:
                 fig.write_html(f.name, include_plotlyjs="cdn")
-                self.current_plot_file = f.name
+                temp_file_path = f.name
 
             # Open in default browser
-            webbrowser.open(f"file://{self.current_plot_file}")
+            webbrowser.open(f"file://{temp_file_path}")
 
             # Update placeholder text
             self.plot_placeholder.config(
@@ -440,39 +387,6 @@ class PlotPanel(ttk.Frame):
 
         except Exception as e:
             messagebox.showerror("Plot Error", f"Could not display plot: {str(e)}")
-
-    def refresh_plot(self):
-        """Refresh the current plot."""
-        messagebox.showinfo("Info", "Plot refresh functionality to be implemented")
-
-    def save_plot(self):
-        """Save the current plot."""
-        if self.current_plot_file:
-            save_path = filedialog.asksaveasfilename(
-                title="Save plot as",
-                defaultextension=".html",
-                filetypes=[
-                    ("HTML files", "*.html"),
-                    ("PNG images", "*.png"),
-                    ("PDF files", "*.pdf"),
-                    ("SVG files", "*.svg"),
-                ],
-            )
-            if save_path:
-                try:
-                    # Copy current plot file to save location
-                    import shutil
-
-                    shutil.copy2(self.current_plot_file, save_path)
-                    messagebox.showinfo("Success", f"Plot saved to {save_path}")
-                except Exception as e:
-                    messagebox.showerror("Error", f"Could not save plot: {str(e)}")
-        else:
-            messagebox.showwarning("Warning", "No plot to save")
-
-    def export_plot(self):
-        """Export plot in various formats."""
-        messagebox.showinfo("Info", "Advanced export functionality to be implemented")
 
     def plot_channel_data(self, file_path: str, channel_name: str):
         """Plot histogram data for a specific channel.
@@ -668,17 +582,11 @@ class HistogramReaderApp:
             label="Open Folder...", command=self.file_manager.select_folder
         )
         file_menu.add_separator()
-        file_menu.add_command(label="Save Plot...", command=self.plot_panel.save_plot)
-        file_menu.add_command(label="Export...", command=self.plot_panel.export_plot)
-        file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.root.quit)
 
         # View menu
         view_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="View", menu=view_menu)
-        view_menu.add_command(
-            label="Refresh Plot", command=self.plot_panel.refresh_plot
-        )
         view_menu.add_command(
             label="Clear Files", command=self.file_manager.clear_files
         )
@@ -737,15 +645,3 @@ Developed for CERN FIT Detector Toolkit
 
         # Start the main event loop
         self.root.mainloop()
-
-        # Cleanup temporary files
-        if (
-            hasattr(self.plot_panel, "current_plot_file")
-            and self.plot_panel.current_plot_file
-        ):
-            try:
-                os.unlink(self.plot_panel.current_plot_file)
-            except OSError:
-                # Temporary file already deleted or permission denied
-                # This is not a critical error during cleanup
-                pass
