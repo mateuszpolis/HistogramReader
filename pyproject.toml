@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "histogram-reader"
-version = "1.0.0"
+version = "1.0.1"
 description = "FIT Detector Histogram Reader Module"
 readme = "README.md"
 license = {text = "MIT"}
@@ -105,7 +105,7 @@ skip_glob = ["old/*"]
 
 
 [tool.mypy]
-python_version = "1.0.0"
+python_version = "1.0.1"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -164,7 +164,7 @@ histogram_reader = ["grid_visualization_mappings/*"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "1.0.0"
+version = "1.0.1"
 version_files = [
     "pyproject.toml:version",
     "histogram_reader/__init__.py:__version__",

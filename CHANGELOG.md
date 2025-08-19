@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/mateuszpolis/HistogramReader/compare/v1.0.0...v1.0.1) (2025-08-19)
+
+
+### Bug Fixes
+
+* **gui:** improve icon loading logic for cross-platform compatibility ([5b8b9f0](https://github.com/mateuszpolis/HistogramReader/commit/5b8b9f0f398bd4a300497529d59f7e70f621c535))
+
 # 1.0.0 (2025-08-19)
 
 
