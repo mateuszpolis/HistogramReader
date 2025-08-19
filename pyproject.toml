@@ -32,6 +32,8 @@ dependencies = [
     "pyarrow>=10.0.0",  # Required for parquet file support
     "requests>=2.28.0",  # Required for DA_batch_client
     "tkinter-tooltip>=2.0.0",
+    "plotly>=5.0.0",  # Interactive plots
+    "kaleido>=0.2.1",  # For plotly image export
 ]
 
 [project.optional-dependencies]
