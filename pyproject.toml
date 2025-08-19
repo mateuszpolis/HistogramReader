@@ -1,0 +1,275 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "histogram-reader"
+version = "1.0.0"
+description = "FIT Detector Histogram Reader Module"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Mateusz Polis", email = "mateusz.polis@cern.ch"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.21.0",
+    "matplotlib>=3.5.0",
+    "scipy>=1.7.0",
+    "pandas>=1.3.0",
+    "pyarrow>=10.0.0",  # Required for parquet file support
+    "requests>=2.28.0",  # Required for DA_batch_client
+    "tkinter-tooltip>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "flake8-docstrings>=1.7.0",
+    "flake8-import-order>=0.18.0",
+    "flake8-bugbear>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+    "bandit>=1.7.5",
+    "pre-commit>=3.3.0",
+    "commitizen>=3.6.0",
+    "autoflake>=2.2.0",
+    "pyupgrade>=3.10.0",
+    "pydocstyle>=6.3.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xvfb>=3.0.0",  # For GUI testing
+]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "sphinxcontrib-napoleon>=0.7",
+    "myst-parser>=2.0.0",
+]
+
+[project.scripts]
+histogram-reader = "histogram_reader.main:main"
+histogram-reader-gui = "histogram_reader.main:main"
+
+# Tool configurations
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | old
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip_glob = ["old/*"]
+
+
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+exclude = ["old/", "build/", "dist/"]
+
+[tool.bandit]
+exclude_dirs = ["old", "test"]
+skips = ["B101", "B601"]
+
+[tool.pydocstyle]
+convention = "google"
+add_ignore = ["D100", "D104", "D105", "D107"]
+match_dir = "(?!old).*"
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--cov=histogram_reader",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--strict-markers",
+    "--disable-warnings",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "local_only: marks tests that require local environment (deselect with '-m \"not local_only\"')",
+]
+
+[tool.coverage.run]
+source = ["histogram_reader"]
+omit = ["*/tests/*", "*/old/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.setuptools.package-data]
+histogram_reader = ["grid_visualization_mappings/*"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "1.0.0"
+version_files = [
+    "pyproject.toml:version",
+    "histogram_reader/__init__.py:__version__",
+]
+tag_format = "v$version"
+update_changelog_on_bump = true
+bump_message = "bump: version $current_version → $new_version"
+changelog_format = "## v$version ($date)"
+changelog_merge_prerelease = true
+changelog_incremental = true
+style = [
+    ["qmark", "fg:#ff9d00 bold"],
+    ["question", "bold"],
+    ["answer", "fg:#ff9d00 bold"],
+    ["pointer", "fg:#ff9d00 bold"],
+    ["highlighted", "fg:#ff9d00 bold"],
+    ["selected", "fg:#cc5454"],
+    ["separator", "fg:#cc5454"],
+    ["instruction", ""],
+    ["text", ""],
+    ["disabled", "fg:#858585 italic"]
+]
+
+# Commit message templates and validation
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "type"
+message = "Select the type of change you are committing:"
+choices = [
+    {value = "feat", name = "feat: A new feature"},
+    {value = "fix", name = "fix: A bug fix"},
+    {value = "docs", name = "docs: Documentation only changes"},
+    {value = "style", name = "style: Changes that do not affect the meaning of the code"},
+    {value = "refactor", name = "refactor: A code change that neither fixes a bug nor adds a feature"},
+    {value = "perf", name = "perf: A code change that improves performance"},
+    {value = "test", name = "test: Adding missing tests or correcting existing tests"},
+    {value = "build", name = "build: Changes that affect the build system or external dependencies"},
+    {value = "ci", name = "ci: Changes to our CI configuration files and scripts"},
+    {value = "chore", name = "chore: Other changes that don't modify src or test files"},
+    {value = "revert", name = "revert: Reverts a previous commit"},
+]
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "scope"
+message = "What is the scope of this change? (class or file name): (press [enter] to skip)"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "subject"
+message = "Write a short, imperative tense description of the change:"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "body"
+message = "Provide a longer description of the change: (press [enter] to skip)"
+
+[[tool.commitizen.customize.questions]]
+type = "confirm"
+name = "is_breaking_change"
+message = "Are there any breaking changes?"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "breaking_change_content"
+message = "Describe the breaking changes:"
+when = "{{ answers.is_breaking_change }}"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "footer"
+message = "Footer. Information about Breaking Changes and reference issues that this commit closes: (press [enter] to skip)"
+
+# Template for commit messages
+[tool.commitizen.customize.commit_parser]
+pattern = "^(?P<change_type>feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\((?P<scope>[^\\(\\)\\r\\n]*)\\))?(?P<breaking>!)?:\\s(?P<message>.*)?"
+schema = "<type>(<scope>): <subject>"
+
+[tool.commitizen.customize.changelog_generator]
+template = """
+## v$version ($date)
+
+{% for group, commits in commits | groupby('change_type') %}
+### {{ group | title }}
+
+{% for commit in commits %}
+- {{ commit.message }} {% if commit.scope %}({{ commit.scope }}){% endif %}
+{% endfor %}
+{% endfor %}
+"""
+
+[tool.commitizen.customize.info]
+path = "cz_conventional_commits"
+tag = "v$version"
+message_template = "{{change_type}}{% if scope %}({{scope}}){% endif %}{% if breaking %}!{% endif %}: {{message}}{% if body %}\n\n{{body}}{% endif %}{% if footer %}\n\n{{footer}}{% endif %}"
+example = "feat(parser): add support for new CSV format"
+schema = """
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+"""
+info = """
+The commit contains the following structural elements:
+- fix: patches a bug in your codebase (PATCH)
+- feat: introduces a new feature to the codebase (MINOR)
+- BREAKING CHANGE: introduces a breaking API change (MAJOR)
+- types like build:, chore:, ci:, docs:, style:, refactor:, perf:, test: are also allowed
+"""
