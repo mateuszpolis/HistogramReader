@@ -530,16 +530,44 @@ class HistogramReaderApp:
 
         # Configure window icon (if available)
         try:
-            # Try to set icon from assets folder
-            icon_path = os.path.join(
-                os.path.dirname(__file__), "..", "..", "assets", "logo.ico"
-            )
-            if os.path.exists(icon_path):
-                self.root.iconbitmap(icon_path)
-        except (tk.TclError, OSError):
+            # Get the absolute path to the assets directory
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            assets_dir = os.path.join(current_dir, "..", "..", "assets")
+
+            # Try to set icon - different approach for different platforms
+            if os.name == "posix" and os.uname().sysname == "Darwin":  # macOS
+                # For macOS, try to set the dock icon using PNG
+                png_path = os.path.join(assets_dir, "logo.png")
+                png_path = os.path.abspath(png_path)
+
+                if os.path.exists(png_path):
+                    # On macOS, we can try to set the dock icon
+                    try:
+                        # This is a macOS-specific approach
+                        self.root.iconphoto(True, tk.PhotoImage(file=png_path))
+                    except Exception as e:
+                        print(f"Could not set macOS dock icon: {e}")
+
+                    # Also try the traditional iconbitmap for the window
+                    try:
+                        ico_path = os.path.join(assets_dir, "logo.ico")
+                        ico_path = os.path.abspath(ico_path)
+                        if os.path.exists(ico_path):
+                            self.root.iconbitmap(ico_path)
+                    except Exception as e:
+                        # Log the error but continue - not critical
+                        print(f"Could not load ICO icon: {e}")
+            else:
+                # For other platforms, use the ICO file
+                ico_path = os.path.join(assets_dir, "logo.ico")
+                ico_path = os.path.abspath(ico_path)
+
+                if os.path.exists(ico_path):
+                    self.root.iconbitmap(ico_path)
+
+        except Exception as e:
             # Icon file not found or invalid format - continue without icon
-            # This is expected behavior and not an error condition
-            pass
+            print(f"Could not load icon: {e}")
 
         # Create main container with paned window
         main_paned = ttk.PanedWindow(self.root, orient="horizontal")
