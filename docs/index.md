@@ -77,8 +77,8 @@ api
 ## Getting Help
 
 - **Documentation**: This documentation covers all aspects of the module
-- **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/your-org/HistogramReader/issues)
-- **Contributing**: See our [Contributing Guide](https://github.com/your-org/HistogramReader/blob/main/CONTRIBUTING.md)
+- **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/mateuszpolis/histogram-reader/issues)
+- **Contributing**: See our [Contributing Guide](https://github.com/mateuszpolis/histogram-reader/blob/main/CONTRIBUTING.md)
 
 ## License
 
